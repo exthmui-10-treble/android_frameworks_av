@@ -398,7 +398,8 @@ private:
     std::map<std::string, std::string> mStringProperties;
     std::map<std::string, std::vector<uint8_t> > mByteArrayProperties;
     std::map<std::string, std::vector<uint8_t> > mReleaseKeysMap;
-    std::map<std::vector<uint8_t>, SecurityLevel> mSecurityLevel;
+    std::map<std::vector<uint8_t>, SecurityLevel> mSecurityLevel
+        GUARDED_BY(mSecurityLevelLock);
     sp<IDrmPluginListener> mListener;
     sp<IDrmPluginListener_V1_2> mListenerV1_2;
     SessionLibrary *mSessionLibrary;
@@ -406,6 +407,7 @@ private:
     int64_t mCloseSessionOkCount;
     int64_t mCloseSessionNotOpenedCount;
     uint32_t mNextSecureStopId;
+    android::Mutex mPlayPolicyLock;
 
     // set by property to mock error scenarios
     Status_V1_2 mMockError;
@@ -415,8 +417,10 @@ private:
         mMockError = Status_V1_2::OK;
     }
 
-    DeviceFiles mFileHandle;
+    DeviceFiles mFileHandle GUARDED_BY(mFileHandleLock);
+    Mutex mFileHandleLock;
     Mutex mSecureStopLock;
+    Mutex mSecurityLevelLock;
 
     CLEARKEY_DISALLOW_COPY_AND_ASSIGN_AND_NEW(DrmPlugin);
 };
